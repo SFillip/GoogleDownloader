@@ -4,22 +4,18 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-
 import urllib.request
 import time
 import os
+import sys
 
-print("What do you want to download?")
-download = input()
-site = 'https://www.google.com/search?tbm=isch&q='+download
-
-print("How hoften should be scrolled?")
-numberOfScrolls = int(input())
+site = 'https://www.google.com/search?tbm=isch&q=%27+sys.argv[1]
+numberOfScrolls = int(sys.argv[2])
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 driver.get(site)
 
-i=0
+i=0a
 while i<numberOfScrolls:
     driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
     try:
@@ -32,26 +28,28 @@ while i<numberOfScrolls:
 soup = BeautifulSoup(driver.page_source, 'html.parser')
 
 driver.close();
-
-img_tags = soup.find_all("img", class_="rg_i")
+img_tags = soup.findall("img", class="rg_i")
 
 
 count = 0
 for i in img_tags:
     try:
         urllib.request.urlretrieve(i['src'], str(count)+".jpg")
-        
+
         img = Image.open(str(count)+".jpg")
 
         width, height = img.size
 
+        prefWidth=int(sys.argv[3])
+        prefHeight=int(sys.argv[4])
+
+        dataFormat=sys.argv[5]
+
         if(width <=height*6):
-            img = img.resize((500,500),Image.LANCZOS)
-            img.save(fp=str(count) + ".jpg")
+            img = img.resize((prefWidth,prefHeight),Image.LANCZOS)
+            img.save(fp=str(count) + dataFormat)
             count+=1
         else:
-            os.remove(str(count)+".jpg")
-   
-
+            os.remove(str(count)+dataFormat)
     except Exception as e:
         pass
